@@ -1,0 +1,298 @@
+/* ==============================================
+   CODE BLOCKS & CONTROLS
+   ============================================== */
+
+.code-block-container {
+  position: relative;
+  background-color: var(--bg-code-block);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-lg);
+  margin: var(--space-6) 0;
+  overflow: hidden;
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background-color: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.code-lang-label {
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.code-controls-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.code-control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.code-control-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-elevated);
+  border-color: var(--border-subtle);
+}
+
+.code-control-btn.is-active {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-medium);
+}
+
+.code-control-btn.is-copied {
+  color: var(--status-tip);
+}
+
+.code-control-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.code-block-container pre {
+  margin: 0;
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Word Wrap: ON by default */
+.code-block-container.has-word-wrap pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
+/* Word Wrap: OFF (horizontal scroll) */
+.code-block-container:not(.has-word-wrap) pre {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.code-block-container code {
+  font-family: inherit;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.code-line {
+  display: block;
+  min-height: 1.6em;
+}
+
+/* Line Numbers: Toggleable (Adaptive Gutter) */
+.code-block-container.has-line-numbers {
+  counter-reset: line-number;
+}
+
+.code-block-container.has-line-numbers .code-line {
+  position: relative;
+  padding-left: calc(var(--line-digits, 1) * 1ch + var(--space-4));
+}
+
+.code-block-container.has-line-numbers .code-line::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--line-digits, 1) * 1ch);
+  text-align: right;
+  color: var(--text-faint);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* ==============================================
+   DIFF SINTAX STYLES
+   ============================================== */
+
+.hljs-addition {
+  background-color: rgba(52, 211, 153, 0.12);
+  color: #6ee7b7;
+  display: inline;
+}
+
+.hljs-deletion {
+  background-color: rgba(248, 113, 113, 0.12);
+  color: #fca5a5;
+  display: inline;
+}
+
+/* ==============================================
+   GFM ALERTS (ADMONITIONS)
+   ============================================== */
+
+.markdown-alert {
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-6) 0;
+  font-style: normal;
+  background-color: var(--bg-surface);
+}
+
+.markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-2);
+  text-transform: capitalize;
+}
+
+.markdown-alert-title svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.markdown-alert-content {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.markdown-alert-content > p:last-child {
+  margin-bottom: 0;
+}
+
+/* Alert Variants */
+.markdown-alert-note {
+  border-left-color: var(--status-note);
+  background-color: var(--status-note-bg);
+}
+.markdown-alert-note .markdown-alert-title {
+  color: var(--status-note);
+}
+
+.markdown-alert-tip {
+  border-left-color: var(--status-tip);
+  background-color: var(--status-tip-bg);
+}
+.markdown-alert-tip .markdown-alert-title {
+  color: var(--status-tip);
+}
+
+.markdown-alert-important {
+  border-left-color: var(--status-important);
+  background-color: var(--status-important-bg);
+}
+.markdown-alert-important .markdown-alert-title {
+  color: var(--status-important);
+}
+
+.markdown-alert-warning {
+  border-left-color: var(--status-warning);
+  background-color: var(--status-warning-bg);
+}
+.markdown-alert-warning .markdown-alert-title {
+  color: var(--status-warning);
+}
+
+.markdown-alert-caution {
+  border-left-color: var(--status-caution);
+  background-color: var(--status-caution-bg);
+}
+.markdown-alert-caution .markdown-alert-title {
+  color: var(--status-caution);
+}
+
+/* ==============================================
+   KATEX MATH CONTAINERS
+   ============================================== */
+
+.math-inline {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.math-block-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: var(--space-4) 0;
+  padding: var(--space-2) 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: center;
+}
+
+.katex-display {
+  margin: 0 !important;
+}
+
+.katex {
+  font-size: 1.1em !important;
+  color: var(--text-primary);
+}
+
+.math-error-badge {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--status-caution);
+  background-color: var(--status-caution-bg);
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  display: inline-block;
+}
+
+/* ==============================================
+   MERMAID DIAGRAM CONTAINERS
+   ============================================== */
+
+.mermaid-wrapper {
+  margin: var(--space-8) 0;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.mermaid-wrapper svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mermaid-error-container {
+  padding: var(--space-4);
+  background-color: var(--status-caution-bg);
+  border: 1px solid var(--status-caution-border);
+  border-radius: var(--border-radius-md);
+  color: var(--status-caution);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}

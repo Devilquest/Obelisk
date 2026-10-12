@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0d0e">
+  <meta name="color-scheme" content="dark">
+  <title>Obelisk: Markdown Viewer & Editor</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+
+  <!-- Critical Boot Splash Styles (Zero-FOUC Guarantee) -->
+  <style>
+    :root {
+      --bg-canvas: #0c0d0e;
+      --text-primary: #f4f4f5;
+      --text-faint: #71717a;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    .app-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-canvas);
+      opacity: 1;
+      transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    .app-splash[hidden] {
+      display: none !important;
+    }
+
+    .app-splash.is-dismissed {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .app-splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+      user-select: none;
+    }
+
+    .app-splash-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: contain;
+      animation: splashPulse 1.5s ease-in-out infinite;
+    }
+
+    .app-splash-title {
+      font-family: var(--font-sans);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      line-height: 1;
+      margin: 0;
+    }
+
+    .app-splash-indicator {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--text-faint);
+      margin-top: 4px;
+    }
+
+    @keyframes splashPulse {
+      0%, 100% {
+        opacity: 0.65;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="./css/variables.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/markdown.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/modal.css">
+  <link rel="stylesheet" href="./css/editor.css">
+  <link rel="stylesheet" href="./css/landing.css">
+
+  <!-- Vendor Stylesheets -->
+  <link rel="stylesheet" href="./vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="./vendor/highlight/github-dark.min.css">
+
+  <!-- Offline Vendor Libraries (Deferred) -->
+  <script src="./vendor/marked/marked.min.js" defer></script>
+  <script src="./vendor/katex/katex.min.js" defer></script>
+  <script src="./vendor/highlight/highlight.min.js" defer></script>
+  <script src="./vendor/mermaid/mermaid.min.js" defer></script>
+
+  <!-- Modular Application Entry Point -->
+  <script type="module" src="./js/app.js"></script>
+</head>
+<body>
+  <!-- Fullscreen Initial App Splash (Covers whole viewport including header on first load) -->
+  <div id="app-splash" class="app-splash" aria-live="polite">
+    <div class="app-splash-content">
+      <img src="./assets/logo.png" alt="Obelisk Logo" class="app-splash-logo">
+      <h1 class="app-splash-title">Obelisk</h1>
+      <span class="app-splash-indicator">loading...</span>
+    </div>
+  </div>
+
+  <!-- Main Application Shell -->
+  <div class="app-layout">
+    <!-- Main Workspace (Full Width) -->
+    <div class="app-workspace">
+      <!-- Landing & Dropzone Screen (Active when no document is loaded) -->
+      <section id="landing-screen" class="landing-screen" aria-label="Upload document">
+        <div class="landing-brand">
+          <img src="./assets/logo.png" alt="Obelisk Logo" class="landing-logo">
+          <h1 class="landing-title">Obelisk</h1>
+          <p class="landing-subtitle">Markdown Viewer & Editor</p>
+        </div>
+
+        <div class="dropzone-area">
+          <div class="dropzone-card" id="dropzone-card" role="button" tabindex="0" aria-label="Drop markdown file here or click to browse">
+            <div class="dropzone-icon" id="dropzone-icon" aria-hidden="true"></div>
+            <span class="dropzone-prompt">Drop Markdown file here</span>
+            <span class="dropzone-btn">Browse file</span>
+            <span class="dropzone-formats">.md · .markdown · .txt</span>
+            <input type="file" id="landing-file-input" accept=".md,.markdown,text/markdown,text/plain" hidden>
+          </div>
+          <div class="landing-actions">
+            <button type="button" id="btn-new-doc" class="landing-action-btn" title="Create a new blank document" aria-label="Create a new blank document">
+              <span class="btn-icon"></span>
+              <span class="btn-label">New Document</span>
+            </button>
+          </div>
+          <p id="landing-error" class="dropzone-error" role="alert" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Sticky Top Application Bar -->
+      <header class="app-header" hidden>
+        <div class="header-container">
+          <!-- Left: Brand Identity & Active Document Path -->
+          <div class="header-brand-section">
+            <a href="#" class="brand-link" id="brand-link" title="Obelisk">
+              <img src="./assets/logo.png" alt="Obelisk Logo" class="brand-icon">
+              <span class="brand-name">Obelisk</span>
+            </a>
+            <span class="header-divider" id="header-divider" hidden>/</span>
+            <span id="doc-path" class="doc-path"></span>
+            <div id="editor-dirty-badge" class="editor-dirty-badge" hidden aria-hidden="true">
+              <span class="dirty-dot"></span>
+              <span class="dirty-label">Unsaved changes</span>
+            </div>
+          </div>
+
+          <!-- Normal Header Action (Edit Mode Entry, Download & Close) -->
+          <div class="header-actions" id="header-actions" hidden>
+            <button type="button" id="btn-edit-doc" class="btn-header-edit" title="Edit markdown document">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Edit</span>
+            </button>
+            <button type="button" id="btn-download-doc" class="btn-header-edit" title="Download markdown file">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Download</span>
+            </button>
+            <button type="button" id="btn-close-doc" class="btn-header-edit" title="Close document">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Close</span>
+            </button>
+          </div>
+
+          <!-- Centered Editor Modes (Segmented Tabs) -->
+          <div class="editor-segmented-tabs" id="editor-segmented-tabs" role="tablist" aria-label="Editor modes" hidden>
+            <button type="button" class="editor-tab is-active" id="tab-edit" role="tab" aria-selected="true" data-tab="edit">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Edit</span>
+            </button>
+            <button type="button" class="editor-tab" id="tab-preview" role="tab" aria-selected="false" data-tab="preview">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Preview</span>
+            </button>
+          </div>
+
+          <!-- Active Editor Actions (Save & Close) -->
+          <div class="editor-actions" id="editor-actions" hidden>
+            <button type="button" id="btn-save-edit" class="btn-editor-save" title="Save changes in memory (Ctrl + S)">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Save</span>
+            </button>
+            <button type="button" id="btn-close-edit" class="btn-header-edit" title="Close editor and return to document viewer">
+              <span class="btn-icon"></span>
+              <span class="btn-label">Close</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Document Viewport -->
+      <main class="app-main">
+        <!-- Full-viewport Loading Veil (Curtain Overlay) -->
+        <div id="loading-veil" class="loading-veil" aria-live="polite" hidden>
+          <div class="veil-content">
+            <div class="spinner"></div>
+            <p id="loading-veil-title" class="state-title">Loading document...</p>
+          </div>
+        </div>
+
+        <div class="document-viewport" id="viewport-container" hidden>
+          <article id="document-content" class="document-container markdown-body"></article>
+
+          <!-- Editor Workspace (Activated via Edit button) -->
+          <div id="editor-workspace" class="editor-workspace" hidden>
+            <!-- Edit Tab Pane: Raw Monospace Textarea -->
+            <div id="editor-edit-pane" class="editor-pane is-active">
+              <textarea id="editor-textarea" class="editor-textarea" spellcheck="false" placeholder="Write markdown content here..." aria-label="Markdown raw content"></textarea>
+            </div>
+
+            <!-- Preview Tab Pane: Live Compiled In-Memory Preview -->
+            <div id="editor-preview-pane" class="editor-pane markdown-body" hidden>
+              <div id="editor-preview-content" class="document-container editor-preview-container"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Back-to-Top Button -->
+        <button type="button" id="btn-scroll-top" class="btn-scroll-top" title="Back to top" aria-label="Back to top">
+          <span class="scroll-top-icon"></span>
+        </button>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
